@@ -9,7 +9,15 @@
     way; only "run whether logged on or not" needs elevation).
 
     Creates a single task, "IPOAlerts", with two daily triggers (10:00 and
-    17:00), both running `python main.py --once`.
+    17:00), both running `python main.py --digest`.
+
+    --digest (not --once) is intentional: it re-fetches and re-posts the
+    CURRENT set of live/upcoming IPOs every run, with no dedup gating. A newly
+    announced IPO appears, an IPO that has since closed drops off (the facts
+    fetch's own date filter excludes it), and an unchanged IPO gets posted
+    again identically. --once instead only alerts once per genuinely new
+    dedup event and stays silent otherwise -- not what a "check what's active
+    right now" schedule should do.
 
     Clicking "Run" on the task (e.g. from the Windows Task Dashboard at
     http://127.0.0.1:8787/) always fires it immediately — that's inherent to
@@ -64,7 +72,7 @@ $settings = New-ScheduledTaskSettingsSet `
     -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 5) `
     -MultipleInstances IgnoreNew
 
-$action = New-ScheduledTaskAction -Execute $PythonExe -Argument "main.py --once" -WorkingDirectory $RepoPath
+$action = New-ScheduledTaskAction -Execute $PythonExe -Argument "main.py --digest" -WorkingDirectory $RepoPath
 
 $triggers = @(
     New-ScheduledTaskTrigger -Daily -At 10:00AM
@@ -75,7 +83,7 @@ Register-ScheduledTask -TaskName "IPOAlerts" -Force `
     -Action $action `
     -Trigger $triggers `
     -Principal $principal -Settings $settings `
-    -Description "IPO Alerts daily check, 10:00 AM and 5:00 PM - python main.py --once"
+    -Description "IPO Alerts daily check, 10:00 AM and 5:00 PM - python main.py --digest"
 
 Write-Host ""
 Write-Host "Registered: IPOAlerts (10:00 and 17:00 daily)."

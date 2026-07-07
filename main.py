@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import argparse
 import logging
+import logging.handlers
 import sys
 import time
+from pathlib import Path
 
 from analyzer import Analyzer
 from config import Config, ConfigError, load_config
@@ -27,12 +29,24 @@ from notifier import Notifier
 
 log = logging.getLogger("ipo_tracker")
 
+_LOG_FILE = Path(__file__).resolve().parent / "ipo_tracker.log"
+
 
 def _setup_logging() -> None:
+    # Task Scheduler runs this headlessly with no visible console — a run that
+    # finds nothing new to send (already-sent IPOs) produces zero output and
+    # looks indistinguishable from "it didn't run at all". Always also write
+    # to a file so every run leaves a trace you can check.
+    fmt = "%(asctime)s | %(levelname)-7s | %(name)s | %(message)s"
+    datefmt = "%Y-%m-%d %H:%M:%S"
+    file_handler = logging.handlers.RotatingFileHandler(
+        _LOG_FILE, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+    )
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+        format=fmt,
+        datefmt=datefmt,
+        handlers=[logging.StreamHandler(), file_handler],
     )
 
 

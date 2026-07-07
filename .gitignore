@@ -3,6 +3,7 @@
 state.db
 *.sqlite
 *.sqlite3
+ipo_tracker.log*
 
 # Python
 __pycache__/

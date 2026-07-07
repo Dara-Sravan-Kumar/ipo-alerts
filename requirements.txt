@@ -1,0 +1,15 @@
+# Core
+python-dotenv>=1.0.0
+requests>=2.31.0
+apscheduler>=3.10.0
+
+# GMP scraping (parsing ipowatch.in's live GMP table)
+beautifulsoup4>=4.12.0
+
+# AI providers (install the one you use; both are safe to have)
+openai>=1.30.0
+google-genai>=0.3.0
+
+# Optional convenience wrapper for Discord webhooks (the code uses `requests`,
+# so this is not strictly required, but handy if you extend the notifier).
+# discord-webhook>=1.3.0
